@@ -2,7 +2,6 @@
 import argparse
 import math
 import pathlib
-import sys
 import warnings
 from collections import defaultdict
 from pprint import pprint
@@ -70,7 +69,7 @@ class COLS:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Questrade Balancer')
+    parser = argparse.ArgumentParser(description='Questrade Rebalancer')
     parser.add_argument('summary', help='Path to investment summary .xlsx')
     return parser.parse_args()
 
@@ -114,20 +113,15 @@ def main():
     for row in rows:
         val_by_symb[row[COLS.equity_symbol]] += row[COLS.market_value]
 
-    pprint(val_by_symb)
-
     val_by_class = defaultdict(float)
     for symbol, mkt_value in val_by_symb.items():
         class_ratios = symbol_classes[symbol]
-        print(symbol, class_ratios, mkt_value)
         ratio_sum = 0
         for class_, ratio in class_ratios.items():
             ratio_sum += ratio
             val_by_class[class_] += ratio * mkt_value
         if not math.isclose(ratio_sum, 1.0, abs_tol=1e-3):
             print(f'Class ratio total {ratio_sum:.5f} for symbol {symbol} is not 100 %')
-
-    pprint(val_by_class)
 
     for class_, mkt_value in val_by_class.items():
         percent_of_port = mkt_value / total_mkt_val * 100
@@ -137,10 +131,6 @@ def main():
             f' Target: {target_allocations[class_] * 100:03.1f} %  '
             f' Actual: {percent_of_port:05.2f} % (${mkt_value:,.2f})'
         )
-
-
-
-
 
 
 if __name__ == '__main__':
